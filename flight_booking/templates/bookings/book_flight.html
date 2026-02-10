@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Flight - SkyBook{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Flight Summary -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-plane me-2"></i>Flight Details</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5 class="text-primary">{{ flight.airline }} {{ flight.flight_number }}</h5>
+                            <p class="mb-1"><strong>Route:</strong> {{ flight.origin }} → {{ flight.destination }}</p>
+                            <p class="mb-1"><strong>Departure:</strong> {{ flight.departure_date|date:"M d, Y" }} at {{ flight.departure_time }}</p>
+                            <p class="mb-1"><strong>Arrival:</strong> {{ flight.arrival_date|date:"M d, Y" }} at {{ flight.arrival_time }}</p>
+                            <p class="mb-1"><strong>Duration:</strong> {{ flight.duration }}</p>
+                            <p class="mb-1"><strong>Aircraft:</strong> {{ flight.aircraft }}</p>
+                            <p class="mb-0"><strong>Available Seats:</strong> {{ flight.available_seats }}</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <h4 class="text-success mb-3">${{ flight.price }}</h4>
+                            <p class="mb-0"><strong>per passenger</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Form -->
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- Passenger Count Selection -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Number of Passengers</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="passengers" class="form-label">Passengers</label>
+                                <select name="passengers" id="passengers" class="form-select" onchange="updateTotal()">
+                                    {% for i in "123456789"|make_list %}
+                                        {% if forloop.counter <= flight.available_seats %}
+                                            <option value="{{ forloop.counter }}" {% if passengers_count == forloop.counter %}selected{% endif %}>{{ forloop.counter }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <h5 class="mt-4">Total: <span id="total-amount" class="text-success">${{ total_amount }}</span></h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Passenger Details -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Passenger Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="passenger-forms">
+                            {{ passenger_formset.management_form }}
+                            {% for form in passenger_formset %}
+                                <div class="passenger-form mb-4 p-3 border rounded">
+                                    <h6>Passenger {{ forloop.counter }}</h6>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            {{ form.first_name.label_tag }}
+                                            {{ form.first_name }}
+                                            {% if form.first_name.errors %}
+                                                <div class="text-danger small">{{ form.first_name.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            {{ form.last_name.label_tag }}
+                                            {{ form.last_name }}
+                                            {% if form.last_name.errors %}
+                                                <div class="text-danger small">{{ form.last_name.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            {{ form.email.label_tag }}
+                                            {{ form.email }}
+                                            {% if form.email.errors %}
+                                                <div class="text-danger small">{{ form.email.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            {{ form.phone.label_tag }}
+                                            {{ form.phone }}
+                                            {% if form.phone.errors %}
+                                                <div class="text-danger small">{{ form.phone.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            {{ form.date_of_birth.label_tag }}
+                                            {{ form.date_of_birth }}
+                                            {% if form.date_of_birth.errors %}
+                                                <div class="text-danger small">{{ form.date_of_birth.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            {{ form.passport_number.label_tag }}
+                                            {{ form.passport_number }}
+                                            {% if form.passport_number.errors %}
+                                                <div class="text-danger small">{{ form.passport_number.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Details -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Payment Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ payment_form.card_number.label_tag }}
+                                {{ payment_form.card_number }}
+                                {% if payment_form.card_number.errors %}
+                                    <div class="text-danger small">{{ payment_form.card_number.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                {{ payment_form.expiry_date.label_tag }}
+                                {{ payment_form.expiry_date }}
+                                {% if payment_form.expiry_date.errors %}
+                                    <div class="text-danger small">{{ payment_form.expiry_date.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                {{ payment_form.cvv.label_tag }}
+                                {{ payment_form.cvv }}
+                                {% if payment_form.cvv.errors %}
+                                    <div class="text-danger small">{{ payment_form.cvv.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                {{ payment_form.name_on_card.label_tag }}
+                                {{ payment_form.name_on_card }}
+                                {% if payment_form.name_on_card.errors %}
+                                    <div class="text-danger small">{{ payment_form.name_on_card.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terms and Conditions -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="#" target="_blank">Terms and Conditions</a> and <a href="#" target="_blank">Cancellation Policy</a>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center">
+                    <a href="{% url 'flights:flight_detail' flight.id %}" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Flight
+                    </a>
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="fas fa-credit-card me-1"></i>Complete Booking
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateTotal() {
+    const passengers = document.getElementById('passengers').value;
+    const price = {{ flight.price }};
+    const total = passengers * price;
+    document.getElementById('total-amount').textContent = '$' + total;
+}
+</script>
+{% endblock %}

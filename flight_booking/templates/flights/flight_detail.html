@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ flight.airline }} {{ flight.flight_number }} - SkyBook{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-plane me-3 fa-2x"></i>
+                        <div>
+                            <h3 class="mb-0">{{ flight.airline }} {{ flight.flight_number }}</h3>
+                            <p class="mb-0 opacity-75">{{ flight.aircraft }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    <!-- Flight Route -->
+                    <div class="flight-route-detail mb-4">
+                        <div class="row text-center">
+                            <div class="col-md-5">
+                                <div class="departure-info">
+                                    <h2 class="display-4 fw-bold text-primary">{{ flight.departure_time }}</h2>
+                                    <h5 class="fw-bold">{{ flight.origin }}</h5>
+                                    <p class="text-muted">{{ flight.departure_date|date:"F d, Y" }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-2 d-flex align-items-center justify-content-center">
+                                <div class="text-center">
+                                    <i class="fas fa-plane fa-2x text-primary mb-2"></i>
+                                    <div class="text-muted small">{{ flight.duration }}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-5">
+                                <div class="arrival-info">
+                                    <h2 class="display-4 fw-bold text-primary">{{ flight.arrival_time }}</h2>
+                                    <h5 class="fw-bold">{{ flight.destination }}</h5>
+                                    <p class="text-muted">{{ flight.arrival_date|date:"F d, Y" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Flight Details -->
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <h6 class="fw-bold text-muted">AIRLINE</h6>
+                                <p class="mb-0">{{ flight.airline }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <h6 class="fw-bold text-muted">AIRCRAFT</h6>
+                                <p class="mb-0">{{ flight.aircraft }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <h6 class="fw-bold text-muted">FLIGHT DURATION</h6>
+                                <p class="mb-0">{{ flight.duration }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <h6 class="fw-bold text-muted">AVAILABLE SEATS</h6>
+                                <p class="mb-0">{{ flight.available_seats }} of {{ flight.total_seats }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Layovers -->
+                    {% if flight.layover_list %}
+                        <div class="layovers-section mt-4 p-3 bg-light rounded">
+                            <h6 class="fw-bold text-muted mb-2">LAYOVERS</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for layover in flight.layover_list %}
+                                    <span class="badge bg-warning text-dark">{{ layover }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="direct-flight mt-4 p-3 bg-success bg-opacity-10 rounded">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <span class="text-success fw-bold">Direct Flight - No Layovers</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Booking Sidebar -->
+        <div class="col-lg-4">
+            <div class="card shadow-lg border-0 sticky-top" style="top: 20px;">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="display-4 fw-bold text-primary">${{ flight.price }}</div>
+                        <div class="text-muted">per person</div>
+                    </div>
+                    
+                    <div class="booking-info mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Passengers:</span>
+                            <span class="fw-bold">{{ request.GET.passengers|default:1 }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Base Price:</span>
+                            <span class="fw-bold">${{ flight.price }}</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-bold">Total:</span>
+                            <span class="fw-bold text-primary">
+                                ${% widthratio flight.price 1 request.GET.passengers|default:1 %}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'bookings:book_flight' flight.id %}?passengers={{ request.GET.passengers|default:1 }}" 
+                           class="btn btn-primary btn-lg w-100 mb-3">
+                            <i class="fas fa-ticket-alt me-2"></i>Book Now
+                        </a>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}?next={% url 'bookings:book_flight' flight.id %}?passengers={{ request.GET.passengers|default:1 }}" 
+                           class="btn btn-primary btn-lg w-100 mb-3">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login to Book
+                        </a>
+                    {% endif %}
+                    
+                    <div class="availability-info text-center">
+                        {% if flight.available_seats <= 5 %}
+                            <div class="text-warning">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                Only {{ flight.available_seats }} seats left!
+                            </div>
+                        {% else %}
+                            <div class="text-success">
+                                <i class="fas fa-check-circle me-1"></i>
+                                {{ flight.available_seats }} seats available
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Back to Search -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <a href="{% url 'flights:home' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Search
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.flight-route-detail {
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 2rem;
+}
+
+.detail-item {
+    padding: 1rem;
+    border-left: 3px solid #007bff;
+    background-color: #f8f9fa;
+    border-radius: 0 0.375rem 0.375rem 0;
+}
+
+.sticky-top {
+    z-index: 1020;
+}
+</style>
+{% endblock %}

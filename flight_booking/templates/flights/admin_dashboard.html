@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Admin Dashboard - SkyBook
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid py-4">
+    <div class="row">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</h2>
+          <a href="{% url 'flights:home' %}" class="btn btn-outline-primary"><i class="fas fa-home me-1"></i>View Site</a>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+          <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <h5 class="card-title mb-0">{{ total_flights }}</h5>
+                    <p class="card-text mb-0">Active Flights</p>
+                  </div>
+                  <i class="fas fa-plane fa-2x opacity-75"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <h5 class="card-title mb-0">{{ total_bookings }}</h5>
+                    <p class="card-text mb-0">Total Bookings</p>
+                  </div>
+                  <i class="fas fa-ticket-alt fa-2x opacity-75"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <h5 class="card-title mb-0">${{ total_revenue|floatformat:0 }}</h5>
+                    <p class="card-text mb-0">Total Revenue</p>
+                  </div>
+                  <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <h5 class="card-title mb-0">{{ recent_bookings|length }}</h5>
+                    <p class="card-text mb-0">Recent Bookings</p>
+                  </div>
+                  <i class="fas fa-clock fa-2x opacity-75"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-3 mb-3">
+                    <a href="{% url 'flights:admin_flights' %}" class="btn btn-primary w-100"><i class="fas fa-plus me-1"></i>Add Flight</a>
+                  </div>
+                  <div class="col-md-3 mb-3">
+                    <a href="{% url 'bookings:admin_bookings' %}" class="btn btn-success w-100"><i class="fas fa-ticket-alt me-1"></i>View Bookings</a>
+                  </div>
+                  <div class="col-md-3 mb-3">
+                    <a href="/admin/" class="btn btn-secondary w-100" target="_blank"><i class="fas fa-cog me-1"></i>Django Admin</a>
+                  </div>
+                  <div class="col-md-3 mb-3">
+                    <a href="{% url 'flights:admin_flights' %}" class="btn btn-info w-100"><i class="fas fa-plane me-1"></i>Manage Flights</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Bookings -->
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="mb-0">Recent Bookings</h5>
+              </div>
+              <div class="card-body">
+                {% if recent_bookings %}
+                  <div class="table-responsive">
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Booking Code</th>
+                          <th>Customer</th>
+                          <th>Flight</th>
+                          <th>Amount</th>
+                          <th>Status</th>
+                          <th>Booked On</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for booking in recent_bookings %}
+                          <tr>
+                            <td>
+                              <strong>{{ booking.confirmation_code }}</strong>
+                            </td>
+                            <td>
+                              <div>
+                                <strong>{{ booking.user.first_name }} {{ booking.user.last_name }}</strong><br />
+                                <small class="text-muted">{{ booking.user.email }}</small>
+                              </div>
+                            </td>
+                            <td>
+                              <div>
+                                <strong>{{ booking.flight.airline }} {{ booking.flight.flight_number }}</strong><br />
+                                <small class="text-muted">{{ booking.flight.origin }} → {{ booking.flight.destination }}</small>
+                              </div>
+                            </td>
+                            <td class="text-success">
+                              <strong>${{ booking.total_amount }}</strong>
+                            </td>
+                            <td>
+                              <span class="badge bg-{% if booking.status == 'confirmed' %}
+                                  success
+                                {% elif booking.status == 'pending' %}
+                                  warning
+                                {% elif booking.status == 'cancelled' %}
+                                  danger
+                                {% else %}
+                                  secondary
+                                {% endif %}">
+                                {{ booking.get_status_display }}
+                              </span>
+                            </td>
+                            <td>{{ booking.created_at|date:'M d, Y H:i' }}</td>
+                            <td>
+                              <a href="{% url 'bookings:admin_booking_detail' booking.id %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye me-1"></i>View</a>
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="text-end mt-3">
+                    <a href="{% url 'bookings:admin_bookings' %}" class="btn btn-outline-primary"><i class="fas fa-list me-1"></i>View All Bookings</a>
+                  </div>
+                {% else %}
+                  <div class="text-center py-4">
+                    <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No recent bookings</h5>
+                    <p class="text-muted">Recent bookings will appear here.</p>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

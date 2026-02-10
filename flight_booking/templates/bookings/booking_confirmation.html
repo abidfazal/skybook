@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Booking Confirmed - SkyBook
+{% endblock %}
+
+{% block content %}
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <!-- Success Message -->
+        <div class="card border-success mb-4">
+          <div class="card-header bg-success text-white">
+            <h4 class="mb-0"><i class="fas fa-check-circle me-2"></i>Booking Confirmed!</h4>
+          </div>
+          <div class="card-body text-center">
+            <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+            <h5 class="text-success mb-3">Your flight has been successfully booked!</h5>
+            <p class="mb-0">A confirmation email has been sent to your registered email address.</p>
+          </div>
+        </div>
+
+        <!-- Booking Details -->
+        <div class="card mb-4">
+          <div class="card-header bg-light">
+            <h5 class="mb-0">Booking Details</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <h6 class="text-primary mb-3">{{ booking.flight.airline }} {{ booking.flight.flight_number }}</h6>
+                <p class="mb-1">
+                  <strong>Booking Code:</strong>
+                </p>
+                <p class="text-primary fs-4 mb-3">{{ booking.confirmation_code }}</p>
+                <p class="mb-1">
+                  <strong>Route:</strong> {{ booking.flight.origin }} → {{ booking.flight.destination }}
+                </p>
+                <p class="mb-1">
+                  <strong>Departure:</strong> {{ booking.flight.departure_date|date:'M d, Y' }} at {{ booking.flight.departure_time }}
+                </p>
+                <p class="mb-1">
+                  <strong>Arrival:</strong> {{ booking.flight.arrival_date|date:'M d, Y' }} at {{ booking.flight.arrival_time }}
+                </p>
+                <p class="mb-0">
+                  <strong>Duration:</strong> {{ booking.flight.duration }}
+                </p>
+              </div>
+              <div class="col-md-6">
+                <div class="text-end">
+                  <h4 class="text-success mb-3">${{ booking.total_amount }}</h4>
+                  <p class="mb-1">
+                    <strong>Passengers:</strong> {{ booking.passenger_count }}
+                  </p>
+                  <p class="mb-1">
+                    <strong>Payment Method:</strong> {{ booking.payment_method }}
+                  </p>
+                  <p class="mb-1">
+                    <strong>Status:</strong>
+                    <span class="badge bg-success">{{ booking.get_status_display }}</span>
+                  </p>
+                  <p class="mb-0">
+                    <strong>Booked on:</strong> {{ booking.created_at|date:'M d, Y H:i' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Passengers -->
+        <div class="card mb-4">
+          <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-users me-2"></i>Passenger Details</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              {% for passenger in booking.passengers.all %}
+                <div class="col-md-6 mb-3">
+                  <div class="border rounded p-3">
+                    <h6>{{ passenger.first_name }} {{ passenger.last_name }}</h6>
+                    <p class="mb-1">
+                      <strong>Email:</strong> {{ passenger.email }}
+                    </p>
+                    <p class="mb-1">
+                      <strong>Phone:</strong> {{ passenger.phone }}
+                    </p>
+                    <p class="mb-1">
+                      <strong>Date of Birth:</strong> {{ passenger.date_of_birth|date:'M d, Y' }}
+                    </p>
+                    {% if passenger.passport_number %}
+                      <p class="mb-1">
+                        <strong>Passport:</strong> {{ passenger.passport_number }}
+                      </p>
+                    {% endif %}
+                    {% if passenger.seat_number %}
+                      <p class="mb-0">
+                        <strong>Seat:</strong> {{ passenger.seat_number }}
+                      </p>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Important Information -->
+        <div class="card mb-4">
+          <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Important Information</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <h6>Check-in</h6>
+                <ul class="mb-0">
+                  <li>Check-in opens 24 hours before departure</li>
+                  <li>Check-in closes 1 hour before departure</li>
+                  <li>Bring valid ID and booking confirmation</li>
+                </ul>
+              </div>
+              <div class="col-md-6">
+                <h6>Cancellation</h6>
+                <ul class="mb-0">
+                  <li>Free cancellation up to 24 hours before departure</li>
+                  <li>Contact us for changes or cancellations</li>
+                  <li>Refunds processed within 5-7 business days</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <a href="{% url 'bookings:my_bookings' %}" class="btn btn-primary"><i class="fas fa-ticket-alt me-1"></i>View My Bookings</a>
+              <div>
+                <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-outline-primary"><i class="fas fa-eye me-1"></i>View Details</a>
+                <button onclick="window.print()" class="btn btn-outline-secondary ms-2"><i class="fas fa-print me-1"></i>Print</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @media print {
+      .navbar,
+      .btn,
+      .card-header.bg-success,
+      .card:last-child,
+      footer {
+        display: none !important;
+      }
+      .card {
+        border: none !important;
+        box-shadow: none !important;
+      }
+      .container {
+        max-width: none !important;
+      }
+    }
+  </style>
+{% endblock %}

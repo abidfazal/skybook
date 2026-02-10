@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {% if flight %}
+    Edit
+  {% else %}
+    Add
+  {% endif %}Flight - SkyBook
+{% endblock %}
+
+{% block content %}
+  <div class="container py-4">
+    <div class="row">
+      <div class="col-lg-8 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2>
+            <i class="fas fa-plane me-2"></i>{% if flight %}
+              Edit
+            {% else %}
+              Add New
+            {% endif %}Flight
+          </h2>
+          <a href="{% url 'flights:admin_flights' %}" class="btn btn-outline-primary"><i class="fas fa-arrow-left me-1"></i>Back to Flights</a>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Flight Information</h5>
+          </div>
+          <div class="card-body">
+            <form method="post">
+              {% csrf_token %}
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  {{ form.airline.label_tag }}
+                  {{ form.airline }}
+                  {% if form.airline.errors %}
+                    <div class="text-danger small">{{ form.airline.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ form.flight_number.label_tag }}
+                  {{ form.flight_number }}
+                  {% if form.flight_number.errors %}
+                    <div class="text-danger small">{{ form.flight_number.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ form.origin.label_tag }}
+                  {{ form.origin }}
+                  {% if form.origin.errors %}
+                    <div class="text-danger small">{{ form.origin.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ form.destination.label_tag }}
+                  {{ form.destination }}
+                  {% if form.destination.errors %}
+                    <div class="text-danger small">{{ form.destination.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ form.departure_date.label_tag }}
+                  {{ form.departure_date }}
+                  {% if form.departure_date.errors %}
+                    <div class="text-danger small">{{ form.departure_date.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ form.arrival_date.label_tag }}
+                  {{ form.arrival_date }}
+                  {% if form.arrival_date.errors %}
+                    <div class="text-danger small">{{ form.arrival_date.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ form.departure_time.label_tag }}
+                  {{ form.departure_time }}
+                  {% if form.departure_time.errors %}
+                    <div class="text-danger small">{{ form.departure_time.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ form.arrival_time.label_tag }}
+                  {{ form.arrival_time }}
+                  {% if form.arrival_time.errors %}
+                    <div class="text-danger small">{{ form.arrival_time.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ form.duration.label_tag }}
+                  {{ form.duration }}
+                  {% if form.duration.errors %}
+                    <div class="text-danger small">{{ form.duration.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ form.price.label_tag }}
+                  {{ form.price }}
+                  {% if form.price.errors %}
+                    <div class="text-danger small">{{ form.price.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ form.total_seats.label_tag }}
+                  {{ form.total_seats }}
+                  {% if form.total_seats.errors %}
+                    <div class="text-danger small">{{ form.total_seats.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ form.aircraft.label_tag }}
+                  {{ form.aircraft }}
+                  {% if form.aircraft.errors %}
+                    <div class="text-danger small">{{ form.aircraft.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-12 mb-3">
+                  {{ form.layovers.label_tag }}
+                  {{ form.layovers }}
+                  {% if form.layovers.errors %}
+                    <div class="text-danger small">{{ form.layovers.errors }}</div>
+                  {% endif %}
+                  <div class="form-text">Enter layover cities separated by commas (optional)</div>
+                </div>
+                <div class="col-md-12 mb-3">
+                  <div class="form-check">{{ form.is_active }}
+                    {{ form.is_active.label_tag }}</div>
+                </div>
+              </div>
+
+              <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-lg">
+                  <i class="fas fa-save me-1"></i>{% if flight %}
+                    Update
+                  {% else %}
+                    Create
+                  {% endif %}Flight
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

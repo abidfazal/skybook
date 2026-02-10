@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Delete Flight - SkyBook
+{% endblock %}
+
+{% block content %}
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-6">
+        <div class="card border-danger">
+          <div class="card-header bg-danger text-white">
+            <h4 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Delete Flight</h4>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-danger">
+              <h6><i class="fas fa-warning me-1"></i>Warning: This action cannot be undone!</h6>
+              <p class="mb-0">Deleting this flight will permanently remove it from the system. Any associated bookings may be affected.</p>
+            </div>
+
+            <div class="flight-details mb-4">
+              <h5>Flight Details</h5>
+              <div class="row">
+                <div class="col-sm-6">
+                  <p class="mb-1">
+                    <strong>Flight Number:</strong>
+                  </p>
+                  <p class="text-primary fs-5">{{ flight.flight_number }}</p>
+                </div>
+                <div class="col-sm-6">
+                  <p class="mb-1">
+                    <strong>Airline:</strong>
+                  </p>
+                  <p class="fs-5">{{ flight.airline }}</p>
+                </div>
+              </div>
+              <p class="mb-1">
+                <strong>Route:</strong> {{ flight.origin }} → {{ flight.destination }}
+              </p>
+              <p class="mb-1">
+                <strong>Departure:</strong> {{ flight.departure_date|date:'M d, Y' }} at {{ flight.departure_time }}
+              </p>
+              <p class="mb-1">
+                <strong>Price:</strong> ${{ flight.price }}
+              </p>
+              <p class="mb-1">
+                <strong>Available Seats:</strong> {{ flight.available_seats }}/{{ flight.total_seats }}
+              </p>
+              <p class="mb-0">
+                <strong>Status:</strong>
+                {% if flight.is_active %}
+                  <span class="badge bg-success">Active</span>
+                {% else %}
+                  <span class="badge bg-secondary">Inactive</span>
+                {% endif %}
+              </p>
+            </div>
+
+            <!-- Check for existing bookings -->
+            {% if flight.bookings.exists %}
+              <div class="alert alert-warning">
+                <h6><i class="fas fa-info-circle me-1"></i>Existing Bookings</h6>
+                <p class="mb-1">This flight has {{ flight.bookings.count }} booking(s). Deleting it will affect these bookings.</p>
+                <p class="mb-0">Consider cancelling the flight instead of deleting it.</p>
+              </div>
+            {% endif %}
+
+            <form method="post">
+              {% csrf_token %}
+              <div class="d-flex justify-content-between">
+                <a href="{% url 'flights:admin_flights' %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Cancel</a>
+                <button type="submit" class="btn btn-danger"><i class="fas fa-trash me-1"></i>Yes, Delete Flight</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

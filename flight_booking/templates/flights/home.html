@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}SkyBook - Find Your Perfect Flight{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Find Your Perfect Flight</h1>
+                <p class="lead mb-4">Search, compare, and book flights from hundreds of airlines worldwide. Your journey begins with SkyBook.</p>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <i class="fas fa-plane display-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Form -->
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-4">
+                    <form method="get" class="flight-search-form">
+                        <div class="row g-3">
+                            <div class="col-md-6 col-lg-3">
+                                <label class="form-label fw-semibold">From</label>
+                                {{ form.origin }}
+                                <datalist id="origins">
+                                    {% for origin in popular_origins %}
+                                        <option value="{{ origin }}">
+                                    {% endfor %}
+                                </datalist>
+                            </div>
+                            
+                            <div class="col-md-6 col-lg-3">
+                                <label class="form-label fw-semibold">To</label>
+                                {{ form.destination }}
+                                <datalist id="destinations">
+                                    {% for destination in popular_destinations %}
+                                        <option value="{{ destination }}">
+                                    {% endfor %}
+                                </datalist>
+                            </div>
+                            
+                            <div class="col-md-6 col-lg-2">
+                                <label class="form-label fw-semibold">Departure</label>
+                                {{ form.departure_date }}
+                            </div>
+                            
+                            <div class="col-md-6 col-lg-2">
+                                <label class="form-label fw-semibold">Passengers</label>
+                                {{ form.passengers }}
+                            </div>
+                            
+                            <div class="col-lg-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100 py-2">
+                                    <i class="fas fa-search me-2"></i>Search
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="trip_type" id="one-way" value="one-way" {% if form.trip_type.value == 'one-way' %}checked{% endif %}>
+                                    <label class="form-check-label" for="one-way">One Way</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="trip_type" id="round-trip" value="round-trip" {% if form.trip_type.value == 'round-trip' %}checked{% endif %}>
+                                    <label class="form-check-label" for="round-trip">Round Trip</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Results -->
+{% if search_performed %}
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">
+                {% if flights %}
+                    {{ flights|length }} flight{{ flights|length|pluralize }} found
+                {% else %}
+                    No flights found
+                {% endif %}
+            </h2>
+            
+            {% if flights %}
+                <div class="row g-4">
+                    {% for flight in flights %}
+                        <div class="col-12">
+                            <div class="card flight-card shadow-sm border-0 h-100">
+                                <div class="card-body p-4">
+                                    <div class="row align-items-center">
+                                        <div class="col-lg-8">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        <div class="airline-logo bg-primary text-white rounded-circle d-flex align-items-center justify-center me-3" style="width: 50px; height: 50px;">
+                                                            <i class="fas fa-plane"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h5 class="mb-0 fw-bold">{{ flight.airline }}</h5>
+                                                            <small class="text-muted">{{ flight.flight_number }} • {{ flight.aircraft }}</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="col-md-8">
+                                                    <div class="flight-route d-flex align-items-center justify-content-between">
+                                                        <div class="text-center">
+                                                            <div class="h4 fw-bold mb-1">{{ flight.departure_time }}</div>
+                                                            <div class="text-muted small">{{ flight.origin }}</div>
+                                                        </div>
+                                                        
+                                                        <div class="text-center flex-grow-1 mx-3">
+                                                            <div class="flight-duration text-muted small mb-1">
+                                                                <i class="fas fa-clock me-1"></i>{{ flight.duration }}
+                                                            </div>
+                                                            <div class="flight-line position-relative">
+                                                                <hr class="my-0">
+                                                                <i class="fas fa-plane position-absolute top-50 start-50 translate-middle bg-white px-2 text-primary"></i>
+                                                            </div>
+                                                            {% if flight.layover_list %}
+                                                                <div class="text-warning small mt-1">
+                                                                    {{ flight.layover_list|length }} stop{{ flight.layover_list|length|pluralize }}
+                                                                </div>
+                                                            {% endif %}
+                                                        </div>
+                                                        
+                                                        <div class="text-center">
+                                                            <div class="h4 fw-bold mb-1">{{ flight.arrival_time }}</div>
+                                                            <div class="text-muted small">{{ flight.destination }}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            {% if flight.layover_list %}
+                                                <div class="layovers mt-3 p-2 bg-light rounded">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                                        Layovers: {{ flight.layover_list|join:", " }}
+                                                    </small>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="col-lg-4 text-lg-end">
+                                            <div class="price-section">
+                                                <div class="h3 text-primary fw-bold mb-1">${{ flight.price }}</div>
+                                                <div class="text-muted small mb-2">per person</div>
+                                                <div class="text-muted small mb-3">
+                                                    <i class="fas fa-users me-1"></i>{{ flight.available_seats }} seats left
+                                                </div>
+                                                <a href="{% url 'flights:flight_detail' flight.id %}?passengers={{ form.passengers.value|default:1 }}" 
+                                                   class="btn btn-primary btn-lg">
+                                                    Select Flight
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-plane-slash display-1 text-muted mb-4"></i>
+                    <h3 class="text-muted">No flights found</h3>
+                    <p class="text-muted">Try adjusting your search criteria to find more options.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Features Section -->
+{% if not search_performed %}
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold">Why Choose SkyBook?</h2>
+        <p class="lead text-muted">We make booking flights simple, secure, and affordable</p>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="text-center">
+                <div class="feature-icon bg-primary text-white rounded-circle d-inline-flex align-items-center justify-center mb-3" style="width: 80px; height: 80px;">
+                    <i class="fas fa-globe fa-2x"></i>
+                </div>
+                <h4>Global Coverage</h4>
+                <p class="text-muted">Access flights from 500+ airlines worldwide</p>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="text-center">
+                <div class="feature-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-center mb-3" style="width: 80px; height: 80px;">
+                    <i class="fas fa-dollar-sign fa-2x"></i>
+                </div>
+                <h4>Best Prices</h4>
+                <p class="text-muted">Compare prices and find the best deals</p>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="text-center">
+                <div class="feature-icon bg-info text-white rounded-circle d-inline-flex align-items-center justify-center mb-3" style="width: 80px; height: 80px;">
+                    <i class="fas fa-shield-alt fa-2x"></i>
+                </div>
+                <h4>Secure Booking</h4>
+                <p class="text-muted">Your data and payments are always protected</p>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="text-center">
+                <div class="feature-icon bg-warning text-white rounded-circle d-inline-flex align-items-center justify-center mb-3" style="width: 80px; height: 80px;">
+                    <i class="fas fa-headset fa-2x"></i>
+                </div>
+                <h4>24/7 Support</h4>
+                <p class="text-muted">Get help whenever you need it</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+.flight-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.flight-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+}
+
+.flight-line hr {
+    border-color: #dee2e6;
+    border-width: 2px;
+}
+
+.feature-icon {
+    transition: transform 0.2s;
+}
+
+.feature-icon:hover {
+    transform: scale(1.1);
+}
+</style>
+{% endblock %}
